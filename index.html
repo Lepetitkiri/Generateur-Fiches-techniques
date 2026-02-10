@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Fiches techniques Ramery Genie Thermique Santé et Services</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Générateur automatique de Fiches Techniques pour Ramery Génie Thermique Santé et Service</h1>
+        <p>par Domitille Regnault</p>
+
+        <div id="drop-area">
+            <p>Glissez et déposez votre fichier Excel ici ou</p>
+            <input type="file" id="fileInput" accept=".xlsx, .xls">
+            <label for="fileInput" class="button">Choisir un fichier</label>
+        </div>
+
+        <div id="file-info" class="hidden">
+            <p>Fichier sélectionné : <span id="file-name"></span></p>
+            <button id="processBtn" class="btn-primary">Générer le ZIP</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/0.18.5/xlsx/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
