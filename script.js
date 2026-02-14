@@ -1,19 +1,33 @@
 /**
- * MODULE 1 : Acquisition du fichier source
- * Ce module gère l'interception du fichier Excel via le drag & drop ou l'explorateur de fichiers.
+ * ==============================================================================
+ * APPLICATION : Générateur de Fiches Techniques - Ramery Génie Thermique
+ * DESCRIPTION : Automatisation de la création d'arborescence projet à partir
+ * d'un export Excel de suivi de plans.
+ * MODULES     : 1 (Acquisition), 2 (Parsing Excel), 3 (Structuration ZIP)
+ * ==============================================================================
  */
 
-// Éléments de l'interface utilisateur
+/** @type {HTMLElement} Zone de dépôt des fichiers */
 const dropArea = document.getElementById('drop-area');
+
+/** @type {HTMLInputElement} Champ de sélection de fichier */
 const fileInput = document.getElementById('fileInput');
 
-// Variable globale pour stocker le fichier en mémoire
+/** @type {HTMLButtonElement} Bouton de lancement du processus */
+const processBtn = document.getElementById('processBtn');
+
+/** * État global de l'application
+ * @namespace
+ */
 window.fichierSource = null;
+window.projetActif = null;
 
 /**
- * Neutralise les comportements par défaut du navigateur pour la zone de dépôt.
- * Empêche le navigateur d'ouvrir le fichier directement.
+ * MODULE 1 : GESTION DES ENTRÉES FICHIERS
+ * Initialisation des écouteurs d'événements pour l'acquisition du document.
  */
+
+// Neutralisation des comportements natifs du navigateur pour le drag & drop
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
     dropArea.addEventListener(eventName, (e) => {
         e.preventDefault();
@@ -21,93 +35,86 @@ window.fichierSource = null;
     });
 });
 
-/**
- * Gère l'événement de dépôt (drop) sur la zone dédiée.
- */
+/** @listens drop */
 dropArea.addEventListener('drop', (e) => {
     const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        setSourceFile(files[0]);
-    }
+    if (files.length > 0) chargerFichier(files[0]);
 });
 
-/**
- * Gère la sélection manuelle via le bouton d'import.
- */
+/** @listens change */
 fileInput.addEventListener('change', (e) => {
     const files = e.target.files;
-    if (files.length > 0) {
-        setSourceFile(files[0]);
-    }
+    if (files.length > 0) chargerFichier(files[0]);
 });
 
 /**
- * Enregistre le fichier sélectionné et prépare l'interface.
- * @param {File} file - Le fichier récupéré depuis l'input ou le drop.
+ * Enregistre le fichier en mémoire et met à jour l'état de l'interface.
+ * @param {File} file - Objet fichier récupéré depuis l'interface.
+ * @returns {void}
  */
-function setSourceFile(file) {
-    // Stockage du fichier pour les traitements futurs
+function chargerFichier(file) {
     window.fichierSource = file;
 
-    // Mise à jour de l'interface utilisateur
     const fileNameSpan = document.getElementById('file-name');
-    const fileInfo = document.getElementById('file-info');
+    const fileInfoArea = document.getElementById('file-info');
 
-    if (fileNameSpan && fileInfo) {
+    if (fileNameSpan && fileInfoArea) {
         fileNameSpan.textContent = file.name;
-        fileInfo.classList.remove('hidden');
-
-        // On masque la zone de dépôt pour éviter les imports multiples
+        fileInfoArea.classList.remove('hidden');
         dropArea.classList.add('hidden');
     }
 }
 
 /**
- * MODULE 2 : Lecture et traitement des données Excel
- * Ce module transforme le flux binaire en objets structurés et extrait les métadonnées.
+ * MODULE 2 : TRAITEMENT DES DONNÉES EXCEL
+ * Orchestre la lecture du binaire et la conversion en objet exploitable.
  */
 
 /**
- * Point d'entrée pour le traitement du fichier.
- * Déclenché par l'événement clic sur le bouton de génération.
+ * Lit le binaire du fichier Excel et extrait les données de l'onglet cible.
+ * @async
+ * @returns {Promise<void>}
  */
 async function traiterFichierExcel() {
+    /** @type {File} */
     const file = window.fichierSource;
     if (!file) return;
 
     const reader = new FileReader();
 
     reader.onload = (e) => {
+        /** @type {Uint8Array} */
         const data = new Uint8Array(e.target.result);
+
+        // Lecture du classeur via la librairie XLSX
         const workbook = XLSX.read(data, { type: 'array' });
 
+        /** @const {string} Nom de l'onglet source dans le fichier Ramery */
         const sheetName = "Liste Plan & NdC";
         const worksheet = workbook.Sheets[sheetName];
 
         if (!worksheet) {
-            alert(`L'onglet "${sheetName}" est introuvable dans le fichier.`);
+            alert(`Erreur : L'onglet "${sheetName}" est introuvable.`);
             return;
         }
 
-        // Conversion en tableau de tableaux (format brut par lignes)
+        /** @type {Array<Array<any>>} Conversion en matrice (Tableau de tableaux) */
         const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-        // Extraction des informations structurées
-        extraireMetadonneesChantier(rawData);
+        analyserContenuExcel(rawData);
     };
-
     reader.readAsArrayBuffer(file);
 }
 
 /**
- * Analyse les lignes brutes pour extraire le nom, le numéro de chantier et les fiches.
- * @param {Array[]} data - Tableau 2D représentant les lignes de l'Excel.
+ * Extrait les métadonnées du chantier et filtre les fiches techniques valides.
+ * @param {Array<Array<any>>} data - Matrice de données issue de l'Excel.
+ * @returns {void}
  */
-function extraireMetadonneesChantier(data) {
+function analyserContenuExcel(data) {
+    /** @type {any[]} Première ligne contenant les métadonnées de l'en-tête */
     const headerRow = data[0] || [];
 
-    // 1. Recherche dynamique du Nom du Chantier (Index 1 à 7)
-    // On récupère la première valeur textuelle trouvée dans la zone de fusion possible
+    // Extraction du Nom du Chantier (Recherche sur plage B1:H1)
     let nomChantier = "Chantier_Inconnu";
     for (let i = 1; i <= 7; i++) {
         if (headerRow[i] && headerRow[i].toString().trim() !== "") {
@@ -116,46 +123,118 @@ function extraireMetadonneesChantier(data) {
         }
     }
 
-    // 2. Recherche dynamique du Numéro de Chantier (Index 9 à 11)
-    // On cherche une valeur purement numérique dans les colonnes J, K ou L
+    // Extraction du Numéro de Chantier (Recherche sur plage J1:L1)
     let numChantier = "000000";
     for (let i = 9; i <= 11; i++) {
-        const valeur = headerRow[i];
-        if (valeur && !isNaN(valeur) && valeur.toString().trim() !== "") {
-            numChantier = valeur.toString().trim();
+        const val = headerRow[i];
+        if (val && !isNaN(val) && val.toString().trim() !== "") {
+            numChantier = val.toString().trim();
             break;
         }
     }
 
-    // 3. Extraction des fiches techniques
-    // On filtre les lignes dont la désignation contient "Spécification technique"
-    // et dont la référence commence par "RET-"
+    // Filtrage des fiches techniques
+    /** @type {Array<{designation: string, reference: string}>} */
     const fichesExtract = [];
+
+    // Analyse itérative des lignes pour identifier les spécifications techniques
     data.forEach(ligne => {
-        const designation = ligne[0] ? ligne[0].toString().trim() : "";
-        const reference = ligne[2] ? ligne[2].toString().trim() : "";
+        const designation = ligne[0] ? ligne[0].toString().trim().toLowerCase() : "";
+        const reference = ligne[2] ? ligne[2].toString().trim().toUpperCase() : "";
 
-        const estSpecification = designation.toLowerCase().includes("spécification technique");
-        const aReferenceValide = reference.startsWith("RET-");
+        // Critères métier : Présence de "ST-" en référence et mots-clés en désignation
+        const aMarqueurST = reference.includes("ST-");
+        const contientMotCle = designation.includes("spéc") || designation.includes("fich");
 
-        if (estSpecification && aReferenceValide) {
+        if (aMarqueurST && contientMotCle) {
             fichesExtract.push({
-                designation: designation,
+                designation: ligne[0].toString().trim(),
                 reference: reference
             });
         }
     });
 
-    // Stockage centralisé des informations pour les modules suivants
+    // Sauvegarde de la structure projet
     window.projetActif = {
         nom: nomChantier,
         numero: numChantier,
         fiches: fichesExtract
     };
 
-    // Déclenchement automatique du module suivant (à venir)
-    // preparerArchiveZip(); 
+    genererStructureZip();
 }
 
-// Liaison de l'événement au bouton principal
-document.getElementById('processBtn').addEventListener('click', traiterFichierExcel);
+/**
+ * MODULE 3 : GÉNÉRATION DE L'ARCHIVE ZIP
+ * Construit l'arborescence de dossiers formatée dans un objet JSZip.
+ */
+
+/**
+ * Génère les dossiers et sous-dossiers (master/old) pour chaque fiche technique.
+ * @async
+ * @returns {Promise<void>}
+ */
+async function genererStructureZip() {
+    const projet = window.projetActif;
+    if (!projet || projet.fiches.length === 0) {
+        alert("Aucune fiche technique valide n'a été détectée.");
+        return;
+    }
+
+    const zip = new JSZip();
+
+    /** @const {string} Nom de la racine de l'archive */
+    const nomDossierRacine = "4-Matériels pour études";
+    const dossierRacine = zip.folder(nomDossierRacine);
+
+    for (const fiche of projet.fiches) {
+        // Extraction de la référence courte (ex: ST-603)
+        const indexST = fiche.reference.indexOf("ST-");
+        const refCourte = indexST !== -1 ? fiche.reference.substring(indexST) : fiche.reference;
+
+        // Nettoyage métier de la désignation (Suppression des préfixes/suffixes techniques)
+        const desigNettoyee = fiche.designation
+            .replace(/Spécification technique/gi, "")
+            .replace(/CLIM|CVC|VENT|EG|CH/gi, "")
+            .trim();
+
+        // Creation de l'arborescence 
+        /** @type {string} Nom du dossier de la fiche (Format: "REF Désignation") */
+        const nomDossierFiche = `${refCourte} ${desigNettoyee}`;
+
+        const folderFiche = dossierRacine.folder(nomDossierFiche);
+
+        folderFiche.folder("old");
+        const folderMaster = folderFiche.folder("master");
+
+        /**
+         * @todo Étape 4.1 : Intégrer ici le chargement et l'injection du modèle Word
+         * via la future méthode de templating.
+         */
+    }
+
+    await finaliserExportZip(zip, "4-Matériels pour études");
+}
+
+/**
+ * Convertit l'objet ZIP en BLOB et déclenche le téléchargement.
+ * @async
+ * @param {JSZip} zip - L'instance JSZip à compiler.
+ * @param {string} nomFichier - Nom du fichier de sortie (sans extension).
+ * @returns {Promise<void>}
+ */
+async function finaliserExportZip(zip, nomFichier) {
+    const content = await zip.generateAsync({
+        type: "blob",
+        compression: "DEFLATE", // Force la compression au lieu du simple stockage
+        compressionOptions: {
+            level: 6 // Niveau de compression équilibré
+        }
+    });
+    saveAs(content, `${nomFichier}.zip`);
+}
+
+/** * EVENT LISTENERS
+ * Liaison des actions utilisateur aux fonctions métier.
+ */
+processBtn.addEventListener('click', traiterFichierExcel);
