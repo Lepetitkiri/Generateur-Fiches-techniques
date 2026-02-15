@@ -11,8 +11,8 @@
 <body>
 
     <div class="container">
-        <h1>Générateur automatique de Fiches Techniques</h1>
-        <p>Ramery Génie Thermique Santé et Service</p>
+        <h1>Générateur automatique de Fiches Techniques pour Ramery Génie Thermique Santé et Service</h1>
+        <p>par Domitille Regnault</p>
 
         <div id="drop-area">
             <p>Glissez et déposez votre fichier Excel ici ou</p>
@@ -24,12 +24,20 @@
             <p>Fichier sélectionné : <span id="file-name"></span></p>
             <button id="processBtn" class="btn-primary">Générer le ZIP</button>
         </div>
+
+        <div id="template-status" class="status-bar">
+            <span id="status-icon" class="status-icon spin-animation">⏳</span>
+            <span id="status-text" class="status-text">Chargement du modèle Word...</span>
+        </div>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.45.0/docxtemplater.js"></script>
 
     <script src="script.js"></script>
 </body>

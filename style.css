@@ -77,3 +77,71 @@ h1 {
 .hidden {
     display: none;
 }
+
+/**
+ * COMPOSANT : Barre de Statut (Template Word)
+ * Rôle : Informe l'utilisateur sur l'état de disponibilité du modèle .docx
+ */
+
+.status-bar {
+    margin: 10px 0;
+    padding: 8px 15px;
+
+    /* Définition de l'identité visuelle neutre (état : initial/chargement) */
+    background-color: #f0f4f8;
+    border-radius: 5px;
+    font-size: 0.9em;
+    display: inline-block;
+
+    /* Transition fluide pour le changement de couleur d'état */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/**
+ * MODIFICATEUR : État de succès
+ * Déclenché via JavaScript une fois le binaire du modèle récupéré avec succès
+ */
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/**
+ * ANIMATION : Rotation continue
+ * Rôle : Création d'un cycle de rotation de 0 à 360 degrés
+ */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    /* La rotation se termine à 50% du temps total */
+    70% {
+        transform: rotate(360deg);
+    }
+
+    /* De 50% à 100%, la rotation reste à 360deg (création de la pause) */
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/**
+ * CLASSE : Icône en cours de chargement
+ * Rôle : Applique l'animation 'spin' à l'élément de manière infinie et linéaire
+ */
+.spin-animation {
+    display: inline-block;
+    animation: spin 2s ease-in-out infinite;
+    margin-right: 8px;
+}
+
+/**
+ * MODIFICATEUR : État de succès (Mise à jour)
+ * Rôle : On s'assure que l'icône ne tourne plus une fois le chargement terminé
+ */
+.status-success .status-icon {
+    animation: none;
+    transform: rotate(0deg);
+}
