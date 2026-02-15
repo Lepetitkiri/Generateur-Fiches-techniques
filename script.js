@@ -3,9 +3,71 @@
  * APPLICATION : Générateur de Fiches Techniques - Ramery Génie Thermique
  * DESCRIPTION : Automatisation de la création d'arborescence projet à partir
  * d'un export Excel de suivi de plans.
- * MODULES     : 1 (Acquisition), 2 (Parsing Excel), 3 (Structuration ZIP)
  * ==============================================================================
  */
+
+/**
+ * Contenu binaire du modèle Word récupéré via le réseau.
+ * Stocké en global pour être réutilisé lors de la génération des fiches.
+ * Initialisé à null au démarrage car le fichier Template-FT n'est pas encore chargé
+ * @type {ArrayBuffer|null}
+ */
+window.templateBinaire = null;
+
+/**
+ * Fonction asynchrone permettant de récupérer le fichier modèle Word (Template-FT.docx).
+ * Met à jour dynamiquement l'interface utilisateur selon l'état de la requête.
+ * @async
+ * @function initialiserTemplate
+ * @returns {Promise<void>}
+ */
+async function initialiserTemplate() {
+
+    // Récupération des éléments HTML créés à l'étape précédente pour mettre à jour l'interface.
+    const statusIcon = document.getElementById('status-icon');
+    const statusText = document.getElementById('status-text');
+    const statusBar = document.getElementById('template-status');
+
+    try {
+
+        // Requête HTTP GET pour obtenir le fichier world source.
+        const reponse = await fetch('./Template-FT.docx');
+
+        if (!reponse.ok) {
+            throw new Error('Le fichier modèle est introuvable sur le serveur.');
+        }
+
+        // Transformation de la réponse brute du serveur en données binaires pour utilisation par PizZip plus tard.
+        window.templateBinaire = await reponse.arrayBuffer();
+
+        // Mise à jour de l'interface utilisateur si succès
+        statusText.textContent = 'Modèle Word opérationnel';
+        statusIcon.textContent = '✅';
+        statusBar.classList.add('status-success');
+        statusIcon.classList.remove('spin-animation'); /*suppression de l'animation rotation*/
+
+    } catch (erreur) {
+
+        // GESTION DE L'ERREUR
+        // Si le chemin est faux ou si le fichier est corrompu, ce bloc s'exécute.
+        console.error('Échec de l\'acquisition du template :', erreur);
+
+        // Mise à jour de l'interface utilisateur si succès
+        statusIcon.textContent = '❌';
+        statusText.textContent = 'Erreur : Modèle Word non chargé';
+        statusBar.classList.add('status-error');
+
+        // On arrête la rotation pour marquer l'arrêt définitif du processus.
+        statusIcon.classList.remove('spin-animation');
+    }
+}
+
+/// Appel à la fonction
+initialiserTemplate();
+
+
+
+
 
 /** @type {HTMLElement} Zone de dépôt des fichiers */
 const dropArea = document.getElementById('drop-area');

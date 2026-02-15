@@ -16,7 +16,11 @@ body {
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     text-align: center;
+    min-height: 400px;
     width: 450px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 h1 {
@@ -64,14 +68,36 @@ h1 {
 }
 
 .btn-generate {
-    background: #27ae60;
-    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 32px;
+    margin: 20px auto 0 auto;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    background: #2980b9;
+    color: #ffffff;
     border: none;
-    padding: 12px 24px;
-    border-radius: 5px;
-    font-weight: bold;
+    border-radius: 50px;
     cursor: pointer;
-    margin-top: 10px;
+    box-shadow: 0 8px 20px rgba(41, 128, 185, 0.25);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-generate:hover {
+    background: #2471a3;
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 12px 25px rgba(41, 128, 185, 0.35);
+}
+
+.btn-generate:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 10px rgba(41, 128, 185, 0.2);
 }
 
 .hidden {
@@ -88,23 +114,39 @@ h1 {
     padding: 8px 15px;
 
     /* Définition de l'identité visuelle neutre (état : initial/chargement) */
-    background-color: #f0f4f8;
+    background-color: #EAFAEE;
     border-radius: 5px;
+    border: 1px solid #c3e6cb;
     font-size: 0.9em;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-width: 250px;
+    justify-content: flex-start;
 
     /* Transition fluide pour le changement de couleur d'état */
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.status-icon {
+    margin-right: 10px;
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+}
+
 /**
- * MODIFICATEUR : État de succès
+ * Etat : succès ou erreur
  * Déclenché via JavaScript une fois le binaire du modèle récupéré avec succès
  */
 .status-success {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
+}
+
+.status-error {
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 
 /**
