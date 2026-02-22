@@ -284,6 +284,46 @@ async function genererStructureZip() {
                 paragraphLoop: true,
                 linebreaks: true,
             });
+
+            // Génération du document word
+            try {
+                /** * Injection des données dans le template
+                 * Ces clés doivent correspondre exactement aux balises entre accolades du Template
+                 * @type {Object}
+                 */
+                doc.setData({
+                    nomProjet: "PROJET TEST RAMERY",
+                    titreFiche: "FICHE TECHNIQUE DEMO",
+                    complémentReference: "REF-000-XYZ",
+                    descriptifFiche: "Descriptif fiche à remplir."
+                });
+
+                // Exécution de la fusion des données
+                doc.render();
+
+                /**
+                 * Génération du binaire final (Blob).
+                 * On récupère le contenu modifié et on le recompresse au format .docx.
+                 * @type {Blob}
+                 */
+                const out = doc.getZip().generate({
+                    type: "blob",
+                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                });
+
+                // Note pour l'étape suivante : 'out' contient maintenant le fichier Word prêt à être mis dans le ZIP.
+
+            } catch (erreur) {
+                // Gestion spécifique des erreurs de rendu Docxtemplater
+                const e = {
+                    message: erreur.message,
+                    name: erreur.name,
+                    stack: erreur.stack,
+                    properties: erreur.properties,
+                };
+                console.error("[Moteur Word] Erreur lors du rendu de la fiche :", e);
+            }
+
         } catch (erreur) {
             console.error(`[Moteur Word] Erreur d'initialisation pour la fiche : ${nomDossierFiche}`, erreur);
         }
