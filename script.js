@@ -269,10 +269,24 @@ async function genererStructureZip() {
         folderFiche.folder("old");
         const folderMaster = folderFiche.folder("master");
 
-        /**
-         * @todo Étape 4.1 : Intégrer ici le chargement et l'injection du modèle Word
-         * via la future méthode de templating.
-         */
+        // Initialisation du moteur du rendu word
+        try {
+            /** * Chargement du binaire dans PizZip. 
+             * @type {PizZip}
+             */
+            const zipTemplate = new window.PizZip(window.templateBinaire);
+
+            /** * Initialisation de Docxtemplater.
+             * Configuration des options de rendu pour la gestion des paragraphes et retours à la ligne.
+             * @type {docxtemplater}
+             */
+            const doc = new window.docxtemplater(zipTemplate, {
+                paragraphLoop: true,
+                linebreaks: true,
+            });
+        } catch (erreur) {
+            console.error(`[Moteur Word] Erreur d'initialisation pour la fiche : ${nomDossierFiche}`, erreur);
+        }
     }
 
     await finaliserExportZip(zip, "4-Matériels pour études");
