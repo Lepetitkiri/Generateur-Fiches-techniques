@@ -292,13 +292,14 @@ async function genererStructureZip() {
                  * @type {Object}
                  */
                 doc.setData({
+                    numChantier: "REF-000-XYZ",
                     nomProjet: "PROJET TEST RAMERY",
                     titreFiche: "FICHE TECHNIQUE DEMO",
-                    complémentReference: "REF-000-XYZ",
+                    complémentReference: "Documents complémentaires",
                     descriptifFiche: "Descriptif fiche à remplir."
                 });
 
-                // Exécution de la fusion des données
+                // Exécution de la fusion des données (Rendu)
                 doc.render();
 
                 /**
@@ -311,7 +312,17 @@ async function genererStructureZip() {
                     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 });
 
-                // Note pour l'étape suivante : 'out' contient maintenant le fichier Word prêt à être mis dans le ZIP.
+                /** * Construction du nom du fichier Word.
+                 * Le fichier est placé dans le dossier 'master' de la fiche actuelle.
+                 * @type {string}
+                 */
+                const nomFichierWord = `${nomDossierFiche}.docx`;
+
+                /** * Ajout du fichier binaire dans le sous-dossier "master".
+                 * @param {string} nomFichierWord - Le nom du document avec extension.
+                 * @param {Blob} out - Le contenu binaire du document Word.
+                 */
+                folderMaster.file(nomFichierWord, out);
 
             } catch (erreur) {
                 // Gestion spécifique des erreurs de rendu Docxtemplater
