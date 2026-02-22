@@ -5,6 +5,21 @@
  * d'un export Excel de suivi de plans.
  * ==============================================================================
  */
+/**
+ * Vérifie si le fichier déposé est un document Excel valide.
+ * @param {File} file - Le fichier à vérifier.
+ * @returns {boolean}
+ */
+function estExcelValide(file) {
+    const extensionAttendue = ".xlsx";
+    const estExcel = file.name.toLowerCase().endsWith(extensionAttendue);
+
+    if (!estExcel) {
+        alert(`❌ Erreur : Le fichier reçu est incorect.\n\nVeuillez déposer le fichier "Liste plans NDC & Bordereaux & Planning".`);
+        return false;
+    }
+    return true;
+}
 
 /**
  * Contenu binaire du modèle Word récupéré via le réseau.
@@ -115,6 +130,12 @@ fileInput.addEventListener('change', (e) => {
  * @returns {void}
  */
 function chargerFichier(file) {
+    // ÉTAPE DE SÉCURITÉ : On vérifie l'extension avant de continuer
+    if (!estExcelValide(file)) {
+        // Si le fichier est invalide, on réinitialise l'input et on s'arrête
+        fileInput.value = "";
+        return;
+    }
     window.fichierSource = file;
 
     const fileNameSpan = document.getElementById('file-name');
