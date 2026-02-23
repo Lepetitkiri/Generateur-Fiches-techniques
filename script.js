@@ -5,6 +5,8 @@
  * d'un export Excel de suivi de plans.
  * ==============================================================================
  */
+import { resetInterfaceDepot } from './utils.js';
+
 /**
  * Vérifie si le fichier déposé est un document Excel valide.
  * @param {File} file - Le fichier à vérifier.
@@ -15,7 +17,7 @@ function estExcelValide(file) {
     const estExcel = file.name.toLowerCase().endsWith(extensionAttendue);
 
     if (!estExcel) {
-        alert(`❌ Erreur : Le fichier reçu est incorect.\n\nVeuillez déposer le fichier "Liste plans NDC & Bordereaux & Planning".`);
+        alert(`❌ Erreur : Le fichier reçu est incorect.\n\nVeuillez déposer le fichier Excel "Liste plans NDC & Bordereaux & Planning" et retentez le coup !.`);
         return false;
     }
     return true;
@@ -69,7 +71,7 @@ async function initialiserTemplate() {
 
         // Mise à jour de l'interface utilisateur si succès
         statusIcon.textContent = '❌';
-        statusText.textContent = 'Erreur : Modèle Word non chargé';
+        statusText.textContent = 'Erreur : Modèle Word non chargé.\n\nVeuillez contacter Domitille pour corriger le bug !';
         statusBar.classList.add('status-error');
 
         // On arrête la rotation pour marquer l'arrêt définitif du processus.
@@ -166,25 +168,41 @@ async function traiterFichierExcel() {
     const reader = new FileReader();
 
     reader.onload = (e) => {
-        /** @type {Uint8Array} */
-        const data = new Uint8Array(e.target.result);
+        try {
+            /** @type {Uint8Array} */
+            const data = new Uint8Array(e.target.result);
 
-        // Lecture du classeur via la librairie XLSX
-        const workbook = XLSX.read(data, { type: 'array' });
+            // Lecture du classeur via la librairie XLSX
+            const workbook = XLSX.read(data, { type: 'array' });
 
-        /** @const {string} Nom de l'onglet source dans le fichier Ramery */
-        const sheetName = "Liste Plan & NdC";
-        const worksheet = workbook.Sheets[sheetName];
+            /** @const {string} Nom de l'onglet source dans le fichier Ramery */
+            const sheetName = "Liste Plan & NdC";
+            const worksheet = workbook.Sheets[sheetName];
 
-        if (!worksheet) {
-            alert(`Erreur : L'onglet "${sheetName}" est introuvable.`);
+            if (!worksheet) {
+                alert(`❌ Erreur d'extraction des données.\n\n Assurez-vous d'utiliser l'excel Ramery apellé "Liste plans NDC & Bordereaux & Planning" et que L'onglet "${sheetName}" soit présent et correctement nommé... et recommencez !`);
+                resetInterfaceDepot();
+                return;
+            }
+
+            /** @type {Array<Array<any>>} Conversion en matrice (Tableau de tableaux) */
+            const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            if (rawData.length < 5) {
+                alert(`❌Le fichier Excel semble vide ou mal formé.`);
+                resetInterfaceDepot();
+                return;
+            }
+
+            analyserContenuExcel(rawData);
+        } catch (erreur) {
+            alert(`❌ Erreur de lecture : ${erreur.message}`);
+            console.error("[Excel Validation]", erreur);
+            resetInterfaceDepot();
             return;
         }
-
-        /** @type {Array<Array<any>>} Conversion en matrice (Tableau de tableaux) */
-        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        analyserContenuExcel(rawData);
     };
+
     reader.readAsArrayBuffer(file);
 }
 
