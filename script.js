@@ -330,13 +330,17 @@ async function genererStructureZip() {
                  * Ces clés doivent correspondre exactement aux balises entre accolades du Template
                  * @type {Object}
                  */
-                doc.setData({
-                    numChantier: "REF-000-XYZ",
-                    nomProjet: "PROJET TEST RAMERY",
-                    titreFiche: "FICHE TECHNIQUE DEMO",
-                    complémentReference: "Documents complémentaires",
-                    descriptifFiche: "Descriptif fiche à remplir."
-                });
+                const donneesFiche = {
+                    numChantier: projet.numero,
+                    nomProjet: projet.nom,
+                    titreFiche: fiche.designation,
+                    nomMateriel: desigNettoyee,
+                    complémentReference: fiche.reference,
+                    descriptifFiche: fiche.designation
+                };
+
+                // Injection du dictionnaire dans le moteur Docxtemplater
+                doc.setData(donneesFiche);
 
                 // Exécution de la fusion des données (Rendu)
                 doc.render();
