@@ -10,7 +10,7 @@
 
 export const REFERENTIEL_MATERIEL = [
     // --- GENERALITES (Série 000) ---
-    { id: "TUYAUTERIE", motCle: "tuyauterie", refConforme: "test ref tuyauterie", descriptif: "test descriptis tuyauterie" },
+    { id: "TUYAUTERIE", motCle: "tuyauterie", refConforme: "", descriptif: "" },
     { id: "GAINES_AERAU", motCle: "aéraulique", refConforme: "", descriptif: "" },
     { id: "GAINE_DF", motCle: "gaines désenf", refConforme: "", descriptif: "" },
 

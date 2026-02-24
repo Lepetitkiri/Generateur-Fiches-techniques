@@ -309,6 +309,9 @@ async function genererStructureZip() {
         folderFiche.folder("old");
         const folderMaster = folderFiche.folder("master");
 
+        // On cherche si le matériel est connu dans notre référentiel
+        const infosMetier = trouverConfigurationMateriel(fiche.designation, REFERENTIEL_MATERIEL);
+
         // Initialisation du moteur du rendu word
         try {
             /** * Chargement du binaire dans PizZip. 
@@ -336,8 +339,8 @@ async function genererStructureZip() {
                     nomProjet: projet.nom,
                     titreFiche: fiche.designation,
                     nomMateriel: desigNettoyee,
-                    complémentReference: fiche.reference,
-                    descriptifFiche: fiche.designation
+                    complémentReference: infosMetier.ref,
+                    descriptifFiche: infosMetier.desc
                 };
 
                 // Injection du dictionnaire dans le moteur Docxtemplater
