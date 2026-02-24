@@ -5,7 +5,7 @@
  * d'un export Excel de suivi de plans.
  * ==============================================================================
  */
-import { resetInterfaceDepot } from './utils.js';
+import { resetInterfaceDepot, trouverConfigurationMateriel } from './utils.js';
 import { REFERENTIEL_MATERIEL } from './ressources.js';
 
 /**
