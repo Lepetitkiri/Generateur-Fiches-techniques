@@ -338,7 +338,7 @@ async function genererStructureZip() {
                 const donneesFiche = {
                     numChantier: projet.numero,
                     nomProjet: projet.nom,
-                    titreFiche: fiche.designation,
+                    titreFiche: desigNettoyee,
                     nomMateriel: desigNettoyee,
                     complémentReference: infosMetier.ref,
                     descriptifFiche: infosMetier.desc
