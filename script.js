@@ -297,7 +297,8 @@ async function genererStructureZip() {
         // Nettoyage métier de la désignation (Suppression des préfixes/suffixes techniques)
         const desigNettoyee = fiche.designation
             .replace(/Spécification technique/gi, "")
-            .replace(/CLIM|CVC|VENT|EG|CH/gi, "")
+            .replace(/\b(CLIM|CVC|VENT|EG|CH)\b/gi, "")
+            .replace(/\s\s+/g, ' ')
             .trim();
 
         // Creation de l'arborescence 
