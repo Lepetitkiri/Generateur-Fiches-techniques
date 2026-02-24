@@ -6,6 +6,7 @@
  * ==============================================================================
  */
 import { resetInterfaceDepot } from './utils.js';
+import { REFERENTIEL_MATERIEL } from './ressources.js';
 
 /**
  * Vérifie si le fichier déposé est un document Excel valide.
