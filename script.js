@@ -283,13 +283,25 @@ async function genererStructureZip() {
         return;
     }
 
+    // Action sur le bouton
+    processBtn.disabled = true;
+    processBtn.textContent = "Initialisation...";
+    processBtn.style.backgroundSize = "0% 100%";
+
     const zip = new JSZip();
 
     /** @const {string} Nom de la racine de l'archive */
     const nomDossierRacine = "4-Matériels pour études";
     const dossierRacine = zip.folder(nomDossierRacine);
 
-    for (const fiche of projet.fiches) {
+    for (let i = 0; i < projet.fiches.length; i++) {
+        const fiche = projet.fiches[i];
+
+        // Mise à jour de la barre de progression
+        const progression = ((i + 1) / projet.fiches.length) * 100;
+        processBtn.style.backgroundSize = `${progression}% 100%`;
+        processBtn.textContent = "Génération en cours...";
+
         // Extraction de la référence courte (ex: ST-603)
         const indexST = fiche.reference.indexOf("ST-");
         const refCourte = indexST !== -1 ? fiche.reference.substring(indexST) : fiche.reference;
@@ -386,9 +398,20 @@ async function genererStructureZip() {
         } catch (erreur) {
             console.error(`[Moteur Word] Erreur d'initialisation pour la fiche : ${nomDossierFiche}`, erreur);
         }
+
+
+        await new Promise(resolve => setTimeout(resolve, 10));
     }
 
+    processBtn.textContent = "Compression du ZIP...";
     await finaliserExportZip(zip, "4-Matériels pour études");
+    processBtn.textContent = "✅ Terminé !";
+
+    setTimeout(() => {
+        processBtn.disabled = false;
+        processBtn.textContent = "Générer le ZIP";
+        processBtn.style.backgroundSize = "0% 100%";
+    }, 3000);
 }
 
 /**
