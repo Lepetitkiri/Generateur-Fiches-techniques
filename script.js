@@ -272,6 +272,12 @@ function analyserContenuExcel(data) {
         nomClient = data[4][11].toString().replace("Nom du client :", "").trim();
     }
 
+    // Extraction de l'adresse du client
+    let adresseClient = "Adresse inconnue";
+    if (data[5] && data[5][11]) {
+        adresseClient = data[5][11].toString().replace("Adresse du client :", "").trim();
+    }
+
     // Filtrage des fiches techniques
     /** @type {Array<{designation: string, reference: string}>} */
     const fichesExtract = [];
@@ -311,6 +317,7 @@ function analyserContenuExcel(data) {
         nom: nomChantier,
         numero: numChantier,
         client: nomClient,
+        adresse: adresseClient,
         fiches: fichesExtract
     };
 
