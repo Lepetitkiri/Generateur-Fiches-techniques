@@ -266,6 +266,14 @@ function analyserContenuExcel(data) {
         }
     }
 
+    // Génération de la date 
+    const aujourdhui = new Date();
+    const dateJour = aujourdhui.toLocaleDateString('fr-FR');
+
+    // Info corps d'état
+    const corpsEtat = "CVC-PB";
+    const numLot = "XX";
+
     // Extraction du nom du client
     let nomClient = "Client inconnu";
     if (data[4] && data[4][11]) {
@@ -318,6 +326,9 @@ function analyserContenuExcel(data) {
         numero: numChantier,
         client: nomClient,
         adresse: adresseClient,
+        date: dateJour,
+        lot: numLot,
+        metier: corpsEtat,
         fiches: fichesExtract
     };
 
