@@ -257,9 +257,12 @@ function analyserContenuExcel(data) {
     let numChantier = "000000";
     for (let i = 9; i <= 11; i++) {
         const val = headerRow[i];
-        if (val && !isNaN(val) && val.toString().trim() !== "") {
-            numChantier = val.toString().trim();
-            break;
+        if (val && val.toString().trim() !== "") {
+            const chiffresUniquement = val.toString().replace(/\D/g, '');
+            if (chiffresUniquement !== "") {
+                numChantier = chiffresUniquement;
+                break;
+            }
         }
     }
 
