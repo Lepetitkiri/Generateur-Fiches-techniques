@@ -266,6 +266,12 @@ function analyserContenuExcel(data) {
         }
     }
 
+    // Extraction du nom du client
+    let nomClient = "Client inconnu";
+    if (data[4] && data[4][11]) {
+        nomClient = data[4][11].toString().replace("Nom du client :", "").trim();
+    }
+
     // Filtrage des fiches techniques
     /** @type {Array<{designation: string, reference: string}>} */
     const fichesExtract = [];
@@ -304,6 +310,7 @@ function analyserContenuExcel(data) {
     window.projetActif = {
         nom: nomChantier,
         numero: numChantier,
+        client: nomClient,
         fiches: fichesExtract
     };
 
