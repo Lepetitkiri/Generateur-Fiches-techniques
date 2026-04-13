@@ -270,8 +270,21 @@ function analyserContenuExcel(data) {
     // Analyse itérative des lignes pour identifier les spécifications techniques
     data.forEach(ligne => {
         const designation = ligne[0] ? ligne[0].toString().trim().toLowerCase() : "";
-        const reference = ligne[2] ? ligne[2].toString().trim().toUpperCase() : "";
 
+        // --- LOGIQUE MULTI-FORMAT : RECHERCHE DE LA RÉFÉRENCE ---
+        // Dans l'ancien Excel : Colonne C (index 2)
+        // Dans le nouveau Excel : Colonne D (index 3)
+        // On récupère les deux colonnes pour tester
+        const refAncienFormat = ligne[2] ? ligne[2].toString().trim().toUpperCase() : "";
+        const refNouveauFormat = ligne[3] ? ligne[3].toString().trim().toUpperCase() : "";
+
+        // On détermine la référence valide (celle qui contient "ST-")
+        let reference = "";
+        if (refNouveauFormat.includes("ST-")) {
+            reference = refNouveauFormat; // Priorité au nouveau format
+        } else if (refAncienFormat.includes("ST-")) {
+            reference = refAncienFormat; // Repli sur l'ancien format
+        }
         // Critères métier : Présence de "ST-" en référence et mots-clés en désignation
         const aMarqueurST = reference.includes("ST-");
         const contientMotCle = designation.includes("spéc") || designation.includes("fich");
