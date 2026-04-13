@@ -199,11 +199,17 @@ async function traiterFichierExcel() {
             const workbook = XLSX.read(data, { type: 'array' });
 
             /** @const {string} Nom de l'onglet source dans le fichier Ramery */
-            const sheetName = "Liste Plan & NdC";
+            const sheetName = workbook.SheetNames.find(name => name === "Liste Plan & NdC" || name === "Liste des livrables");
             const worksheet = workbook.Sheets[sheetName];
 
             if (!worksheet) {
-                alert(`❌ Erreur d'extraction des données.\n\n Assurez-vous d'utiliser l'excel Ramery apellé "Liste plans NDC & Bordereaux & Planning" et que L'onglet "${sheetName}" soit présent et correctement nommé... et recommencez !`);
+                alert(`❌ Erreur d'extraction des données.
+
+Le fichier doit impérativement contenir l'un de ces deux onglets :
+- "Liste Plan & NdC" (Ancien format)
+- "Liste des livrables" (Nouveau format)
+
+Veuillez vérifier le nom de l'onglet dans votre Excel et recommencez !`);
                 resetInterfaceDepot();
                 return;
             }
