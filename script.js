@@ -5,7 +5,7 @@
  * d'un export Excel de suivi de plans.
  * ==============================================================================
  */
-import { resetInterfaceDepot, trouverConfigurationMateriel } from './utils.js';
+import { resetInterfaceDepot, trouverConfigurationMateriel, genererDocument } from './utils.js';
 import { REFERENTIEL_MATERIEL } from './ressources.js';
 
 /** Configuration bootstrap */
@@ -410,86 +410,36 @@ async function genererStructureZip() {
         // On cherche si le matériel est connu dans notre référentiel
         const infosMetier = trouverConfigurationMateriel(fiche.designation, REFERENTIEL_MATERIEL);
 
-        // Initialisation du moteur du rendu word
+        // Préparation des données à injecter
+        const donneesFiche = {
+            numChantier: projet.numero,
+            nomProjet: projet.nom,
+            titreFiche: desigNettoyee,
+            nomMateriel: desigNettoyee,
+            complémentReference: infosMetier.ref,
+            descriptifFiche: infosMetier.desc,
+            reference: fiche.reference,
+            nomClient: projet.client,
+            adresseClient: projet.adresse,
+            numLot: projet.lot,
+            corpsEtat: projet.metier,
+            dateJour: projet.date
+        };
+
         try {
-            /** * Chargement du binaire dans PizZip. 
-             * @type {PizZip}
-             */
-            const zipTemplate = new window.PizZip(window.templateFTBinaire);
+            // Génération de la Fiche Technique
+            const outFT = genererDocument(window.templateFTBinaire, donneesFiche);
+            folderMaster.file(`${nomDossierFiche}.docx`, outFT);
 
-            /** * Initialisation de Docxtemplater.
-             * Configuration des options de rendu pour la gestion des paragraphes et retours à la ligne.
-             * @type {docxtemplater}
-             */
-            const doc = new window.docxtemplater(zipTemplate, {
-                paragraphLoop: true,
-                linebreaks: true,
-            });
+            // Génération du Cartouche
+            const outCartouche = genererDocument(window.templateCartoucheBinaire, donneesFiche);
+            folderMaster.file(`Cartouche - ${nomDossierFiche}.docx`, outCartouche);
 
-            // Génération du document word
-            try {
-                /** * Injection des données dans le template
-                 * Ces clés doivent correspondre exactement aux balises entre accolades du Template
-                 * @type {Object}
-                 */
-                const donneesFiche = {
-                    numChantier: projet.numero,
-                    nomProjet: projet.nom,
-                    titreFiche: desigNettoyee,
-                    nomMateriel: desigNettoyee,
-                    complémentReference: infosMetier.ref,
-                    descriptifFiche: infosMetier.desc,
-                    reference: fiche.reference,
-                    nomClient: projet.client,
-                    adresseClient: projet.adresse,
-                    numLot: projet.lot,
-                    corpsEtat: projet.metier,
-                    dateJour: projet.date
-                };
-
-                // Injection du dictionnaire dans le moteur Docxtemplater
-                doc.setData(donneesFiche);
-
-                // Exécution de la fusion des données (Rendu)
-                doc.render();
-
-                /**
-                 * Génération du binaire final (Blob).
-                 * On récupère le contenu modifié et on le recompresse au format .docx.
-                 * @type {Blob}
-                 */
-                const out = doc.getZip().generate({
-                    type: "blob",
-                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                });
-
-                /** * Construction du nom du fichier Word.
-                 * Le fichier est placé dans le dossier 'master' de la fiche actuelle.
-                 * @type {string}
-                 */
-                const nomFichierWord = `${nomDossierFiche}.docx`;
-
-                /** * Ajout du fichier binaire dans le sous-dossier "master".
-                 * @param {string} nomFichierWord - Le nom du document avec extension.
-                 * @param {Blob} out - Le contenu binaire du document Word.
-                 */
-                folderMaster.file(nomFichierWord, out);
-
-            } catch (erreur) {
-                // Gestion spécifique des erreurs de rendu Docxtemplater
-                const e = {
-                    message: erreur.message,
-                    name: erreur.name,
-                    stack: erreur.stack,
-                    properties: erreur.properties,
-                };
-                console.error("[Moteur Word] Erreur lors du rendu de la fiche :", e);
-            }
+            console.log(`🚀 Succès : ${projet.fiches.length} dossiers créés avec double génération (FT + Cartouche).`);
 
         } catch (erreur) {
-            console.error(`[Moteur Word] Erreur d'initialisation pour la fiche : ${nomDossierFiche}`, erreur);
+            console.error(`❌ Erreur de génération pour ${nomDossierFiche} :`, erreur);
         }
-
 
         await new Promise(resolve => setTimeout(resolve, 10));
     }

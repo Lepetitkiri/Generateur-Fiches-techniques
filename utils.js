@@ -57,3 +57,42 @@ export function trouverConfigurationMateriel(designationExcel, referentiel) {
         };
     }
 }
+
+
+/**
+ * GÉNÉRATION DE DOCUMENT WORD
+ * Prend un template binaire et un objet de données pour retourner un fichier Word (Blob).
+ * @param {ArrayBuffer} templateBinaire - Le contenu du fichier .docx source.
+ * @param {Object} donnees - Les balises à remplacer (ex: donneesFiche).
+ * @returns {Blob} - Le fichier final prêt à être mis dans le ZIP.
+ */
+export function genererDocument(templateBinaire, donnees) {
+    try {
+        // Chargement du binaire dans PizZip
+        const zip = new window.PizZip(templateBinaire);
+
+        // Configuration Docxtemplater sur le zip
+        const doc = new window.docxtemplater(zip, {
+            paragraphLoop: true,
+            linebreaks: true,
+        });
+
+        // Injection des données et rendu du document
+        doc.setData(donnees);
+        doc.render();
+
+        // Généreration du fichier binaire final (Blob)
+        return doc.getZip().generate({
+            type: "blob",
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        });
+    } catch (erreur) {
+        const errorDetails = {
+            message: erreur.message,
+            name: erreur.name,
+            properties: erreur.properties,
+            stack: erreur.stack
+        };
+        throw errorDetails;
+    }
+}
