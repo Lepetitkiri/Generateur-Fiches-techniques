@@ -444,9 +444,18 @@ async function genererStructureZip() {
         await new Promise(resolve => setTimeout(resolve, 10));
     }
 
+    // Easter egg du vendredi =)
+    const maintenant = new Date();
+    const jour = maintenant.getDay();
+    const heure = maintenant.getHours();
+
     processBtn.textContent = "Compression du ZIP...";
     await finaliserExportZip(zip, "4-Matériels pour études");
-    processBtn.textContent = "✅ Terminé !";
+    if (jour === 5 && heure >= 12) {
+        processBtn.textContent = "✅ Terminé ! Bon weekend !";
+    } else {
+        processBtn.textContent = "✅ Terminé !";
+    }
 
     setTimeout(() => {
         processBtn.disabled = false;
@@ -477,3 +486,21 @@ async function finaliserExportZip(zip, nomFichier) {
  * Liaison des actions utilisateur aux fonctions métier.
  */
 processBtn.addEventListener('click', traiterFichierExcel);
+
+// EASTER EGG : DÉTECTEUR D'ÉNERVEMENT
+let clicsRapides = 0;
+let dernierClic = 0;
+
+document.addEventListener('click', () => {
+    const maintenant = Date.now();
+    if (maintenant - dernierClic < 400) {
+        clicsRapides++;
+    } else {
+        clicsRapides = 1;
+    }
+    dernierClic = maintenant;
+    if (clicsRapides === 3) {
+        alert("Hé, calme-toi coco ! Ça va bien se passer... 🧘‍♂️");
+        clicsRapides = 0;
+    }
+});
