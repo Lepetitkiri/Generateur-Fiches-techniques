@@ -275,16 +275,21 @@ function analyserContenuExcel(data) {
     const numLot = "XX";
 
     // Extraction du nom du client
-    let nomClient = "Client inconnu";
-    if (data[4] && data[4][11]) {
-        nomClient = data[4][11].toString().replace("Nom du client :", "").trim();
+    let nomClient = "Client";
+    if (data[0] && data[0][12]) {
+        nomClient = data[0][12].toString().replace("Nom du client :", "").trim();
     }
 
     // Extraction de l'adresse du client
-    let adresseClient = "Adresse inconnue";
-    if (data[5] && data[5][11]) {
-        adresseClient = data[5][11].toString().replace("Adresse du client :", "").trim();
+    let adresseClient = "Adresse client";
+    if (data[1] && data[1][12]) {
+        adresseClient = data[1][12].toString().replace("Adresse du client :", "").trim();
     }
+
+    console.log("- Valeur brute en M1 :", data[0][12]);
+    console.log("- Nom du client retenu :", nomClient);
+    console.log("- Valeur brute en M2 :", data[1] ? data[1][12] : "Indéfini");
+    console.log("- Adresse retenue :", adresseClient);
 
     // Filtrage des fiches techniques
     /** @type {Array<{designation: string, reference: string}>} */
