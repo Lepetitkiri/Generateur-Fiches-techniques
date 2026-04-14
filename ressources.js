@@ -44,8 +44,8 @@ export const REFERENTIEL_MATERIEL = [
             "Pression disponible :\n" +
             "Marque :\n" +
             "Type :\n" +
-            "Dimensions :\n"
-"Poids :\n\n" +
+            "Dimensions :\n" +
+            "Poids :\n\n" +
             "Caractéristiques spécifiques :\n" +
             "Filtration :\n" +
             "Échangeur :\n" +
@@ -111,7 +111,7 @@ export const REFERENTIEL_MATERIEL = [
 
     // -- AUTRES (hors série) --
     {
-        id: "BALLON", motCle: "ballon", refConforme: "Plans Ramery", descriptif: "Les ballons auront les caractéristiques suivantes :\nn\" +
+        id: "BALLON", motCle: "ballon", refConforme: "Plans Ramery", descriptif: "Les ballons auront les caractéristiques suivantes :\n\n" +
             "• Ballon 1 :\n" +
             "   - Marque :\n" +
             "   - Modèle :\n" +
@@ -129,7 +129,7 @@ export const REFERENTIEL_MATERIEL = [
             "   - Jeu de vannes d'isolement"
     },
     {
-        id: "RIDEAU", motCle: "Rideau", refConforme: "Plans Ramery", descriptif: "Les rideaux d'air chaud auront les caractéristiques suivantes :\nn\" +
+        id: "RIDEAU", motCle: "Rideau", refConforme: "Plans Ramery", descriptif: "Les rideaux d'air chaud auront les caractéristiques suivantes :\n\n" +
             "Rideau 1 :\n" +
             "Marque :\n" +
             "Modèle :\n" +
