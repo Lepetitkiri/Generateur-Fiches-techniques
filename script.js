@@ -47,12 +47,14 @@ function estExcelValide(file) {
 }
 
 /**
- * Contenu binaire du modèle Word récupéré via le réseau.
- * Stocké en global pour être réutilisé lors de la génération des fiches.
- * Initialisé à null au démarrage car le fichier Template-FT n'est pas encore chargé
+ * Contenu binaire des modèles Word récupérés via le réseau.
+ * Stockés en global pour être réutilisés lors de la génération des fiches.
+ * Initialisés à null au démarrage car les templates ne sont pas encore chargés
  * @type {ArrayBuffer|null}
  */
-window.templateBinaire = null;
+window.templateFTBinaire = null; //Fiche technique
+window.templateCartoucheBinaire = null; // Cartouche
+
 
 /**
  * Fonction asynchrone permettant de récupérer le fichier modèle Word (Template-FT.docx).
@@ -70,18 +72,22 @@ async function initialiserTemplate() {
 
     try {
 
-        // Requête HTTP GET pour obtenir le fichier world source.
-        const reponse = await fetch('./Template-FT.docx');
+        // Requête HTTP GET pour obtenir les fichiers world source.
+        const [repFT, repCartouche] = await Promise.all([
+            fetch('./Template-FT.docx'),
+            fetch('./Template-Cartouche.docx')
+        ]);
 
-        if (!reponse.ok) {
-            throw new Error('Le fichier modèle est introuvable sur le serveur.');
+        if (!repFT.ok || !repCartouche.ok) {
+            throw new Error('Un des modèles Word est introuvable sur le serveur.');
         }
 
         // Transformation de la réponse brute du serveur en données binaires pour utilisation par PizZip plus tard.
-        window.templateBinaire = await reponse.arrayBuffer();
+        window.templateFTBinaire = await repFT.arrayBuffer();
+        window.templateCartoucheBinaire = await repCartouche.arrayBuffer();
 
         // Mise à jour de l'interface utilisateur si succès
-        statusText.textContent = 'Modèle Word opérationnel';
+        statusText.textContent = 'Modèle Word opérationnel (2/2)';
         statusIcon.textContent = '✅';
         statusBar.classList.add('status-success');
         statusIcon.classList.remove('spin-animation'); /*suppression de l'animation rotation*/
@@ -90,11 +96,11 @@ async function initialiserTemplate() {
 
         // GESTION DE L'ERREUR
         // Si le chemin est faux ou si le fichier est corrompu, ce bloc s'exécute.
-        console.error('Échec de l\'acquisition du template :', erreur);
+        console.error('Échec de l\'acquisition des templates :', erreur);
 
         // Mise à jour de l'interface utilisateur si succès
         statusIcon.textContent = '❌';
-        statusText.textContent = 'Erreur : Modèle Word non chargé.\n\nVeuillez contacter Domitille pour corriger le bug !';
+        statusText.textContent = 'Erreur : Modèles Word de base non chargés.\n\nVeuillez contacter Domitille pour corriger le bug !';
         statusBar.classList.add('status-error');
 
         // On arrête la rotation pour marquer l'arrêt définitif du processus.
