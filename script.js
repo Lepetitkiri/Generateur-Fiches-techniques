@@ -270,9 +270,19 @@ function analyserContenuExcel(data) {
     const aujourdhui = new Date();
     const dateJour = aujourdhui.toLocaleDateString('fr-FR');
 
-    // Info corps d'état
-    const corpsEtat = "CVC-PB";
-    const numLot = "XX";
+    // Extraction du nom du corps d'état
+    let corpsEtat = "CVC-PB";
+    if (data[3] && data[3][12]) {
+        const valeurM4 = data[3][12].toString().replace("Corps d'état :", "").trim();
+        if (valeurM4 !== "") corpsEtat = valeurM4;
+    }
+
+    // Extraction du numéro de lot 
+    let numLot = "XX";
+    if (data[2] && data[2][12]) {
+        const valeurM3 = data[2][12].toString().replace("Lot n° :", "").trim();
+        if (valeurM3 !== "") numLot = valeurM3;
+    }
 
     // Extraction du nom du client
     let nomClient = "Client";
@@ -285,11 +295,6 @@ function analyserContenuExcel(data) {
     if (data[1] && data[1][12]) {
         adresseClient = data[1][12].toString().replace("Adresse du client :", "").trim();
     }
-
-    console.log("- Valeur brute en M1 :", data[0][12]);
-    console.log("- Nom du client retenu :", nomClient);
-    console.log("- Valeur brute en M2 :", data[1] ? data[1][12] : "Indéfini");
-    console.log("- Adresse retenue :", adresseClient);
 
     // Filtrage des fiches techniques
     /** @type {Array<{designation: string, reference: string}>} */
