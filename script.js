@@ -433,7 +433,7 @@ async function genererStructureZip() {
 
             // Génération du Cartouche
             const outCartouche = genererDocument(window.templateCartoucheBinaire, donneesFiche);
-            folderMaster.file(`Cartouche - ${nomDossierFiche}.docx`, outCartouche);
+            folderMaster.file(`Cartouche ind A.docx`, outCartouche);
 
             console.log(`🚀 Succès : ${projet.fiches.length} dossiers créés avec double génération (FT + Cartouche).`);
 
