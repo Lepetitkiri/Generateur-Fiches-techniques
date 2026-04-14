@@ -415,7 +415,7 @@ async function genererStructureZip() {
             /** * Chargement du binaire dans PizZip. 
              * @type {PizZip}
              */
-            const zipTemplate = new window.PizZip(window.templateBinaire);
+            const zipTemplate = new window.PizZip(window.templateFTBinaire);
 
             /** * Initialisation de Docxtemplater.
              * Configuration des options de rendu pour la gestion des paragraphes et retours à la ligne.
@@ -438,7 +438,13 @@ async function genererStructureZip() {
                     titreFiche: desigNettoyee,
                     nomMateriel: desigNettoyee,
                     complémentReference: infosMetier.ref,
-                    descriptifFiche: infosMetier.desc
+                    descriptifFiche: infosMetier.desc,
+                    reference: fiche.reference,
+                    nomClient: projet.client,
+                    adresseClient: projet.adresse,
+                    numLot: projet.lot,
+                    corpsEtat: projet.metier,
+                    dateJour: projet.date
                 };
 
                 // Injection du dictionnaire dans le moteur Docxtemplater
