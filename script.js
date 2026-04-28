@@ -73,21 +73,15 @@ async function initialiserTemplate() {
     try {
 
         // Requête HTTP GET pour obtenir les fichiers world source.
-        const [repFT, repCartouche] = await Promise.all([
-            fetch('./Template-FT.docx'),
-            fetch('./Template-Cartouche.docx')
-        ]);
+        const reponse = await fetch('./Template-Unique.docx')
 
-        if (!repFT.ok || !repCartouche.ok) {
-            throw new Error('Un des modèles Word est introuvable sur le serveur.');
-        }
+        if (!reponse.ok) throw new Error('Modèle Word introuvable sur le serveur.');
 
         // Transformation de la réponse brute du serveur en données binaires pour utilisation par PizZip plus tard.
-        window.templateFTBinaire = await repFT.arrayBuffer();
-        window.templateCartoucheBinaire = await repCartouche.arrayBuffer();
+        window.templateUniqueBinaire = await reponse.arrayBuffer();
 
         // Mise à jour de l'interface utilisateur si succès
-        statusText.textContent = 'Modèle Word opérationnel (2/2)';
+        statusText.textContent = 'Modèle Word opérationnel';
         statusIcon.textContent = '✅';
         statusBar.classList.add('status-success');
         statusIcon.classList.remove('spin-animation'); /*suppression de l'animation rotation*/
@@ -96,7 +90,7 @@ async function initialiserTemplate() {
 
         // GESTION DE L'ERREUR
         // Si le chemin est faux ou si le fichier est corrompu, ce bloc s'exécute.
-        console.error('Échec de l\'acquisition des templates :', erreur);
+        console.error('Échec de l\'acquisition du template :', erreur);
 
         // Mise à jour de l'interface utilisateur si succès
         statusIcon.textContent = '❌';
@@ -427,15 +421,11 @@ async function genererStructureZip() {
         };
 
         try {
-            // Génération de la Fiche Technique
-            const outFT = genererDocument(window.templateFTBinaire, donneesFiche);
-            folderMaster.file(`${nomDossierFiche}.docx`, outFT);
+            // Génération du Word
+            const outDocument = genererDocument(window.templateUniqueBinaire, donneesFiche);
+            folderMaster.file(`${nomDossierFiche}.docx`, outDocument);
 
-            // Génération du Cartouche
-            const outCartouche = genererDocument(window.templateCartoucheBinaire, donneesFiche);
-            folderMaster.file(`Cartouche ind A.docx`, outCartouche);
-
-            console.log(`🚀 Succès : ${projet.fiches.length} dossiers créés avec double génération (FT + Cartouche).`);
+            console.log(`🚀 Succès : Document généré pour ${nomDossierFiche}`);
 
         } catch (erreur) {
             console.error(`❌ Erreur de génération pour ${nomDossierFiche} :`, erreur);
