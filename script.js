@@ -52,8 +52,8 @@ function estExcelValide(file) {
  * Initialisés à null au démarrage car les templates ne sont pas encore chargés
  * @type {ArrayBuffer|null}
  */
-window.templateFTBinaire = null; //Fiche technique
-window.templateCartoucheBinaire = null; // Cartouche
+window.templateFTBinaire = null; // Template Fiche technique
+window.templateNDCBianire = null; // Template Note de calcul
 
 
 /**
@@ -71,14 +71,18 @@ async function initialiserTemplate() {
     const statusBar = document.getElementById('template-status');
 
     try {
+        const version = Date.now();
 
-        // Requête HTTP GET pour obtenir les fichiers world source.
-        const reponse = await fetch('./Template-Unique.docx')
-
-        if (!reponse.ok) throw new Error('Modèle Word introuvable sur le serveur.');
-
+        // 1. Chargement du modèle Fiche Technique
+        const reponseFT = await fetch(`./Template-FT.docx?v=${version}`);
+        if (!reponseFT.ok) throw new Error('Modèle Word de Fiche Technique introuvable sur le serveur.');
         // Transformation de la réponse brute du serveur en données binaires pour utilisation par PizZip plus tard.
-        window.templateUniqueBinaire = await reponse.arrayBuffer();
+        window.templateFTBinaire = await reponseFT.arrayBuffer();
+
+        // 2. Chargement du modèle Note de Calcul
+        const reponseNDC = await fetch(`./Template-NDC.docx?v=${version}`);
+        if (!reponseNDC.ok) throw new Error('Modèle NDC introuvable.');
+        window.templateNDCBinaire = await reponseNDC.arrayBuffer();
 
         // Mise à jour de l'interface utilisateur si succès
         statusText.textContent = 'Modèle Word opérationnel';
@@ -90,7 +94,7 @@ async function initialiserTemplate() {
 
         // GESTION DE L'ERREUR
         // Si le chemin est faux ou si le fichier est corrompu, ce bloc s'exécute.
-        console.error('Échec de l\'acquisition du template :', erreur);
+        console.error('Échec de l\'acquisition des templates :', erreur);
 
         // Mise à jour de l'interface utilisateur si succès
         statusIcon.textContent = '❌';
@@ -426,7 +430,6 @@ async function genererStructureZip() {
 
         // Préparation des données à injecter
         const donneesFiche = {
-            type: "ST",
             numChantier: projet.numero,
             nomProjet: projet.nom,
             titreFiche: desigNettoyee,
@@ -443,7 +446,7 @@ async function genererStructureZip() {
 
         try {
             // Génération du Word ST
-            const outDocument = genererDocument(window.templateUniqueBinaire, donneesFiche);
+            const outDocument = genererDocument(window.templateFTBinaire, donneesFiche);
             folderMaster.file(`${nomDossierFiche}.docx`, outDocument);
 
             console.log(`🚀 Succès : Document généré pour ${nomDossierFiche}`);
@@ -470,7 +473,6 @@ async function genererStructureZip() {
 
             // Préparation des données à injecter dans le template unique
             const donneesNdC = {
-                type: "NDC",
                 numChantier: projet.numero,
                 nomProjet: projet.nom,
                 titreFiche: desigNdcNettoyee,
@@ -487,7 +489,7 @@ async function genererStructureZip() {
 
             try {
                 // Génération du document Word via ta fonction générique
-                const outDocumentNdc = genererDocument(window.templateUniqueBinaire, donneesNdC);
+                const outDocumentNdc = genererDocument(window.templateNDCBinaire, donneesNdC);
 
                 // Enregistre dans le dossier "3-Notes de calculs"
                 dossierNotesCalcul.file(`${nomFichierNdc}.docx`, outDocumentNdc);
