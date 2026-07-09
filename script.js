@@ -339,9 +339,10 @@ function analyserContenuExcel(data) {
         else if (designation !== "") {
             const commenceParSpecification = designation.startsWith("spécification technique");
             const commenceParPlan = designation.startsWith("plan");
+            const estLigneEntete = (designation === "désignation");
 
             // Si elle ne commence NI par l'un NI par l'autre, récupération :
-            if (!commenceParSpecification && !commenceParPlan) {
+            if (!commenceParSpecification && !commenceParPlan && !estLigneEntete) {
                 const codeNDC = ligne[3] ? ligne[3].toString().trim().toUpperCase() : "";
 
                 notesCalculExtract.push({
