@@ -389,6 +389,7 @@ async function genererStructureZip() {
     const zip = new JSZip();
 
     /** @const {string} Nom de la racine de l'archive */
+    const dossierNotesCalcul = zip.folder("3-Notes de calculs");
     const nomDossierRacine = "4-Matériels pour études";
     const dossierRacine = zip.folder(nomDossierRacine);
 
@@ -425,6 +426,7 @@ async function genererStructureZip() {
 
         // Préparation des données à injecter
         const donneesFiche = {
+            type: "ST",
             numChantier: projet.numero,
             nomProjet: projet.nom,
             titreFiche: desigNettoyee,
@@ -440,7 +442,7 @@ async function genererStructureZip() {
         };
 
         try {
-            // Génération du Word
+            // Génération du Word ST
             const outDocument = genererDocument(window.templateUniqueBinaire, donneesFiche);
             folderMaster.file(`${nomDossierFiche}.docx`, outDocument);
 
@@ -452,6 +454,52 @@ async function genererStructureZip() {
 
         await new Promise(resolve => setTimeout(resolve, 10));
     }
+    // Génération du Word NDC
+    if (projet.notesCalcul && projet.notesCalcul.length > 0) {
+        for (let j = 0; j < projet.notesCalcul.length; j++) {
+            const ndc = projet.notesCalcul[j];
+
+            // Nettoyage de la désignation :
+            const desigNdcNettoyee = ndc.designation
+                .replace(/^Spécification technique/gi, "")
+                .replace(/^Plan/gi, "")
+                .replace(/\s\s+/g, ' ')
+                .trim();
+
+            const nomFichierNdc = `${ndc.reference} - ${desigNdcNettoyee}`;
+
+            // Préparation des données à injecter dans le template unique
+            const donneesNdC = {
+                type: "NDC",
+                numChantier: projet.numero,
+                nomProjet: projet.nom,
+                titreFiche: desigNdcNettoyee,
+                nomMateriel: desigNdcNettoyee,
+                complémentReference: "",
+                descriptifFiche: "",
+                reference: ndc.reference,
+                nomClient: projet.client,
+                adresseClient: projet.adresse,
+                numLot: projet.lot,
+                corpsEtat: projet.metier,
+                dateJour: projet.date
+            };
+
+            try {
+                // Génération du document Word via ta fonction générique
+                const outDocumentNdc = genererDocument(window.templateUniqueBinaire, donneesNdC);
+
+                // Enregistre dans le dossier "3-Notes de calculs"
+                dossierNotesCalcul.file(`${nomFichierNdc}.docx`, outDocumentNdc);
+
+                console.log(`🚀 Succès : Note de calcul générée pour ${nomFichierNdc}`);
+            } catch (erreur) {
+                console.error(`❌ Erreur de génération pour la NdC ${nomFichierNdc} :`, erreur);
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 5));
+        }
+    }
 
     // Easter egg du vendredi =)
     const maintenant = new Date();
@@ -459,7 +507,7 @@ async function genererStructureZip() {
     const heure = maintenant.getHours();
 
     processBtn.textContent = "Compression du ZIP...";
-    await finaliserExportZip(zip, "4-Matériels pour études");
+    await finaliserExportZip(zip, "Dossier études");
     if (jour === 5 && heure >= 12) {
         processBtn.textContent = "✅ Terminé ! Bon weekend !";
     } else {
