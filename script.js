@@ -296,9 +296,12 @@ function analyserContenuExcel(data) {
         adresseClient = data[1][12].toString().replace("Adresse du client :", "").trim();
     }
 
-    // Filtrage des fiches techniques
+    // Filtrage des fiches techniques et note de calcul
     /** @type {Array<{designation: string, reference: string}>} */
+    // Fiches techniques
     const fichesExtract = [];
+    // Notes de calcul 
+    const notesCalculExtract = [];
 
     // Analyse itérative des lignes pour identifier les spécifications techniques
     data.forEach(ligne => {
@@ -318,7 +321,7 @@ function analyserContenuExcel(data) {
         } else if (refAncienFormat.includes("ST-")) {
             reference = refAncienFormat; // Repli sur l'ancien format
         }
-        // Critères métier : Présence de "ST-" en référence et mots-clés en désignation
+        // Critères métier : Présence de "ST-" en référence = Spécification technique
         const aMarqueurST = reference.includes("ST-");
         const contientMotCle = designation.includes("spéc") || designation.includes("fich");
 
@@ -327,6 +330,21 @@ function analyserContenuExcel(data) {
                 designation: ligne[0].toString().trim(),
                 reference: reference
             });
+        }
+        // Critères métier : Exlusion de "Spécification technique" et "Plan" = Note de calcul
+        else if (designation !== "") {
+            const commenceParSpecification = designation.startsWith("spécification technique");
+            const commenceParPlan = designation.startsWith("plan");
+
+            // Si elle ne commence NI par l'un NI par l'autre, récupération :
+            if (!commenceParSpecification && !commenceParPlan) {
+                const codeNDC = ligne[3] ? ligne[3].toString().trim().toUpperCase() : "";
+
+                notesCalculExtract.push({
+                    designation: ligne[0].toString().trim(),
+                    reference: codeNDC
+                });
+            }
         }
     });
 
@@ -339,7 +357,8 @@ function analyserContenuExcel(data) {
         date: dateJour,
         lot: numLot,
         metier: corpsEtat,
-        fiches: fichesExtract
+        fiches: fichesExtract,
+        notesCalcul: notesCalculExtract
     };
 
     genererStructureZip();
